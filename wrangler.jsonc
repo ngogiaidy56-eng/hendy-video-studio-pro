@@ -5,12 +5,10 @@
   "compatibility_date": "2026-03-01",
   "compatibility_flags": ["nodejs_compat"],
 
-  // 1. Workers AI Binding (Whisper, Flux, Llama)
   "ai": {
     "binding": "AI"
   },
 
-  // 2. D1 Database
   "d1_databases": [
     {
       "binding": "DB",
@@ -19,7 +17,6 @@
     }
   ],
 
-  // 3. R2 Object Storage
   "r2_buckets": [
     {
       "binding": "ASSETS_BUCKET",
@@ -27,7 +24,6 @@
     }
   ],
 
-  // 4. Durable Objects (WebSocket Server)
   "durable_objects": {
     "bindings": [
       {
@@ -44,7 +40,6 @@
     }
   ],
 
-  // 5. Cloudflare Workflows
   "workflows": [
     {
       "name": "video-render-workflow",
