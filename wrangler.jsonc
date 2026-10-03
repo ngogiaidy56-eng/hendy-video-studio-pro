@@ -36,7 +36,7 @@
   "migrations": [
     {
       "tag": "v1",
-      "new_sqlite_classes": ["WebSocketServer"] // Thay "new_classes" thành "new_sqlite_classes"
+      "new_sqlite_classes": ["WebSocketServer"]
     }
   ],
 
