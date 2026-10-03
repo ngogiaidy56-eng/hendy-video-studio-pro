@@ -5,19 +5,21 @@
   "compatibility_date": "2026-03-01",
   "compatibility_flags": ["nodejs_compat"],
 
+  // 1. Workers AI Binding (Whisper, Flux, Llama)
   "ai": {
     "binding": "AI"
   },
 
+  // 2. D1 Database
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "hendy-studio-db",
-      // THAY CHUỖI GUID THẬT VÀO ĐÂY:
-      "database_id": "a1b2c3d4-e5f6-7890-abcd-1234567890ab" 
+      "database_id": "a1b2c3d4-e5f6-7890-abcd-1234567890ab"
     }
   ],
 
+  // 3. R2 Object Storage
   "r2_buckets": [
     {
       "binding": "ASSETS_BUCKET",
@@ -25,13 +27,7 @@
     }
   ],
 
-  "vectorize": [
-    {
-      "binding": "VECTOR_INDEX",
-      "index_name": "hendy-studio-index"
-    }
-  ],
-
+  // 4. Durable Objects (WebSocket Server)
   "durable_objects": {
     "bindings": [
       {
@@ -48,6 +44,7 @@
     }
   ],
 
+  // 5. Cloudflare Workflows
   "workflows": [
     {
       "name": "video-render-workflow",
