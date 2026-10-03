@@ -1,0 +1,16 @@
+# Node Modules & Build Output
+node_modules/
+.wrangler/
+dist/
+build/
+
+# Environment Variables & Secrets (TUYỆT ĐỐI KHÔNG UPLOAD)
+.env
+.env.*
+!.env.example
+
+# OS & Editor Files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
