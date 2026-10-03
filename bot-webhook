@@ -1,105 +1,48 @@
-async function handleCallbackQuery(callbackQuery: any, env: Env): Promise<void> {
-  const queryId = callbackQuery.id;
-  const data = callbackQuery.data;
-  const message = callbackQuery.message;
-  const userId = callbackQuery.from?.id;
+function getMainMenuData(firstName: string, isAdmin = false, version = '3.2.0') {
+  const text =
+    `👋 <b>Xin chào ${escapeHtml(firstName)}!</b>\n\n` +
+    `Chào mừng bạn đến với <b>Trung tâm kiểm soát hệ thống (SOT v${version})</b>.\n` +
+    `<i>Nguồn chuẩn duy nhất - Điều hành CRM & Video Studio</i>`;
 
-  if (!message || !message.chat?.id || !userId) return;
-  const chatId = message.chat.id;
-  const isAdmin = isAdminUser(env, userId); // Hàm check admin sẵn có trong code của bạn
-
-  // Hàm gửi yêu cầu cập nhật lại Reply Markup lên Telegram API (Đã sửa lại URL chuẩn)
-  const updateInlineKeyboard = async (newKeyboard: any) => {
-    const url = `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/editMessageReplyMarkup`;
-    await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: chatId,
-        message_id: message.message_id,
-        reply_markup: newKeyboard
-      })
-    });
-  };
-
-  // Trả lời Telegram để tắt trạng thái "đang tải" (loading) trên nút bấm của người dùng
-  const answerCallback = async () => {
-    await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/answerCallbackQuery`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ callback_query_id: queryId })
-    });
-  };
-
-  try {
-    // Kích hoạt phản hồi click lập tức
-    await answerCallback();
-
-    // BẮT SỰ KIỆN: Người dùng nhấn các nút trên Menu Chính
-    if (['view_sot_panel', 'view_crm', 'view_render_jobs', 'view_sot', 'refresh_admin', 'back_to_main'].includes(data)) {
-      // Tạo giao diện với màu sắc đã được xáo trộn ngẫu nhiên
-      const newMarkup = generateRandomizedMainKeyboard(isAdmin);
-      
-      // Gửi lệnh cập nhật màu sắc mới cho cụm nút bấm
-      await updateInlineKeyboard(newMarkup);
-    }
-
-    // ==========================================
-    // CÁC LOGIC XỬ LÝ KHÁC (Chuyển hướng menu chi tiết)
-    // ==========================================
-    if (data === 'view_sot_panel') {
-      const { text, replyMarkup } = await getSOTControlPanelData(env, env.APP_VERSION || '3.2.0');
-      await editTelegramMessageText(env.TELEGRAM_BOT_TOKEN, chatId, message.message_id, text, replyMarkup);
-      return;
-    }
-
-    if (data === 'view_crm') {
-      const crmText =
-        `💼 <b>ĐIỀU HÀNH CRM HỆ THỐNG</b>\n\n` +
-        `🌐 <b>Trạng thái phân hệ:</b> ĐANG HOẠT ĐỘNG\n` +
-        `📡 <b>Webhook Hub:</b> Cloudflare Workers -> Telegram Bot\n` +
-        `🗄️ <b>Cơ sở dữ liệu:</b> Cloudflare D1 Storage`;
-
-      const replyMarkup = {
-        inline_keyboard: [
-          [{ text: '◀️ Quay lại Menu Chính', callback_data: 'back_to_main' }]
-        ]
-      };
-      await editTelegramMessageText(env.TELEGRAM_BOT_TOKEN, chatId, message.message_id, crmText, replyMarkup);
-      return;
-    }
-      
-  } catch (error) {
-    console.error("Lỗi khi xử lý đổi màu nút Callback:", error);
-  }
-}
-
-// Hàm tạo ra menu chính với màu sắc được random lại hoàn toàn
-function generateRandomizedMainKeyboard(isAdmin = false) {
-  const colors: Array<"primary" | "success" | "danger"> = ['primary', 'success', 'danger'];
+  const colors = ['primary', 'success', 'danger'];
   const randomStyle = () => colors[Math.floor(Math.random() * colors.length)];
 
   const inline_keyboard: Array<Array<{ text: string; callback_data?: string; style?: string }>> = [
     [
-      { text: '🎛️ Kiểm soát SOT', callback_data: 'view_sot_panel' },
-      { text: '💼 Điều hành CRM', callback_data: 'view_crm' }
+      { text: '🎛️ Kiểm soát SOT', callback_data: 'view_sot_panel', style: randomStyle() },
+      { text: '💼 Điều hành CRM', callback_data: 'view_crm', style: randomStyle() }
     ],
     [
-      { text: '🎬 Quản lý Video Render', callback_data: 'view_render_jobs' },
-      { text: '📊 Trạng thái SOT', callback_data: 'view_sot' }
+      { text: '🎬 Quản lý Video Render', callback_data: 'view_render_jobs', style: randomStyle() },
+      { text: '📊 Trạng thái SOT', callback_data: 'view_sot', style: randomStyle() }
     ]
   ];
 
   if (isAdmin) {
     inline_keyboard.push([
-      { text: '⚙️ Bảng Điều Khiển Admin', callback_data: 'refresh_admin' }
+      { text: '⚙️ Bảng Điều Khiển Admin', callback_data: 'refresh_admin', style: 'danger' }
     ]);
   }
 
-  // Thêm nút quay lại menu chính nếu cần
-  inline_keyboard.push([
-    { text: '🏠 Menu Chính', callback_data: 'back_to_main' }
-  ]);
-
-  return { inline_keyboard };
+  // TRẢ VỀ OBJECT (Telegram API yêu cầu reply_markup là Object cấu trúc JSON, không phải chuỗi string)
+  return { 
+    text, 
+    replyMarkup: { inline_keyboard } 
+  };
 }
+
+const updateInlineKeyboard = async (env: Env, chatId: number | string, messageId: number, newKeyboard: any) => {
+  // Đã sửa lại đúng domain chuẩn của Telegram API: api.telegram.org
+  const url = `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/editMessageReplyMarkup`;
+  
+  await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: chatId,
+      message_id: messageId,
+      // Truyền trực tiếp Object bàn phím vào đây, hàm JSON.stringify tổng bên ngoài sẽ tự lo việc bọc toàn bộ body
+      reply_markup: newKeyboard 
+    })
+  });
+};
