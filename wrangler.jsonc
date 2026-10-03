@@ -13,7 +13,8 @@
     {
       "binding": "DB",
       "database_name": "hendy-studio-db",
-      "database_id": "<YOUR_D1_DATABASE_ID>"
+      // THAY CHUỖI GUID THẬT VÀO ĐÂY:
+      "database_id": "a1b2c3d4-e5f6-7890-abcd-1234567890ab" 
     }
   ],
 
